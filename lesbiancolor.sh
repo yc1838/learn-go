@@ -9,7 +9,8 @@
 # ------------------------------------------
 : ${PRIDE_THEME_MODE:="dark"} # 终端背景模式：填 "dark" 或 "light"
 : ${PRIDE_THEME_USER:="%n"}   # 强制显示的名字，默认为真实系统名 %n。如果想伪装，填 "lilith"
-: ${RAINBOW_TYPING:="off"}    # 彩虹打字机默认状态："on" 或 "off"
+: ${RAINBOW_TYPING:="on"}     # 彩虹打字机默认状态："on" 或 "off"
+: ${PRIDE_INPUT_COLOR:="purple"} # 彩虹关闭时的打字颜色："purple" 或 "default"
 
 # ------------------------------------------
 # 2. 动态色板定义 (Palette Definition)
@@ -31,6 +32,15 @@ else
     [rainbow_4]="#A2E4B8" [rainbow_5]="#9BC1FF" [rainbow_6]="#D0B0FF"
     [trans_1]="#5BCEFA" [trans_2]="#F5A9B8" [trans_3]="#FFFFFF"
   )
+fi
+
+# 处理原色输入覆盖
+if [[ "$PRIDE_INPUT_COLOR" == "default" ]]; then
+  if [[ "$PRIDE_THEME_MODE" == "light" ]]; then
+    theme_colors[input]="#333333" # 浅色背景用深灰色
+  else
+    theme_colors[input]="#FFFFFF" # 深色背景用纯白色
+  fi
 fi
 
 # ------------------------------------------
