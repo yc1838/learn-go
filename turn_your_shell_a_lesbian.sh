@@ -1,5 +1,23 @@
 #!/bin/bash
 
+# Attempt to automatically resize the terminal to 95 columns to fit the TUI perfectly
+printf '\e[8;24;95t'
+
+# ================================
+# Check for --back uninstall flag
+# ================================
+if [[ "$1" == "--back" ]]; then
+    echo "🗑️ Removing Pride Shell configuration from ~/.zshrc..."
+    if [ -f "$HOME/.zshrc" ]; then
+        perl -0777 -pi.bak -e 's/(?:\n|^)# ==========================================\n# Pride Shell Theme Configuration\n.*?source ".*?lesbiancolor\.sh"\n?//gs' "$HOME/.zshrc"
+        echo "✅ Uninstalled successfully! Your terminal is now back to its original state."
+        echo "   Please restart your terminal or run: source ~/.zshrc"
+    else
+        echo "⚠️ ~/.zshrc not found. Nothing to remove."
+    fi
+    exit 0
+fi
+
 # ================================
 # Terminal UI Colors & Components
 # ================================
@@ -216,7 +234,7 @@ else
     MSG_LOADING="🚀 正在将绝美配置写入 ~/.zshrc..."
     MSG_ERR_MISSING="❌ 错误：找不到主题文件 (\$THEME_SCRIPT)。请确保它和此安装脚本在同一个目录下！"
     MSG_SUCCESS="✅ 安装成功！"
-    MSG_RESTART="请重启终端，循环效果如需重置，可以手动运行以下命令来立刻体验："
+    MSG_RESTART="请重启终端，或者手动运行以下命令来立刻体验："
     
     OPTIONS=(
         "$PREVIEW_DW_ZH"
@@ -270,6 +288,9 @@ if [[ -z "$THEME_USER" ]]; then
     THEME_USER="%n"
 fi
 
+# Move cursor back down below the box
+echo -ne "\033[2B"
+
 # Get absolute path of lesbiancolor.sh
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 THEME_SCRIPT="$SCRIPT_DIR/lesbiancolor.sh"
@@ -280,6 +301,11 @@ if [ ! -f "$THEME_SCRIPT" ]; then
 fi
 
 ZSHRC="$HOME/.zshrc"
+
+# Clean up any existing Pride Shell configurations before injecting a new one
+if [ -f "$ZSHRC" ]; then
+    perl -0777 -pi.bak -e 's/(?:\n|^)# ==========================================\n# Pride Shell Theme Configuration\n.*?source ".*?lesbiancolor\.sh"\n?//gs' "$ZSHRC"
+fi
 
 # 3. Play loading animation
 run_loading "$MSG_LOADING"
