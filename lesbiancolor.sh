@@ -1,94 +1,97 @@
 # ==========================================
-# Shell字体女同性恋旗帜配色方案
-# Lesbian Flag Shell Colors
+# Pride Shell Theme (Lesbian & Trans Flag Edition)
+# Open Source Version v1.0
 # ==========================================
-# 使用 24-bit (RGB) 真色彩
-# Utilizes 24-bit (RGB) true colors
-# 颜色顺序：深红橙 -> 浅橙 -> 白 -> 淡粉 -> 暗紫 -> 淡紫(输入)
-# Color order: dark red-orange -> light orange -> white -> light pink -> dark purple -> light purple (input)
-# ==========================================
-# 把以下内容添加到zsh配置文件（一般来说是 ~/.zshrc）中
-# Add the following content to the zsh configuration file (usually ~/.zshrc)
-# 然后运行 'source ~/.zshrc' 来应用更改
-# Then run 'source ~/.zshrc' to apply the changes
 
+# ------------------------------------------
+# 1. 用户配置区 (Configuration)
+# 你可以在 ~/.zshrc 引入此文件之前覆盖这些变量
+# ------------------------------------------
+: ${PRIDE_THEME_MODE:="dark"} # 终端背景模式：填 "dark" 或 "light"
+: ${PRIDE_THEME_USER:="%n"}   # 强制显示的名字，默认为真实系统名 %n。如果想伪装，填 "lilith"
+: ${RAINBOW_TYPING:="off"}    # 彩虹打字机默认状态："on" 或 "off"
 
-PROMPT="%F{#D84B20}➜ %F{#EF7627}lilith%F{#FFFFFF}@%F{#D162A4}%1~ %F{#A30262}$ %F{#C197D2}"
+# ------------------------------------------
+# 2. 动态色板定义 (Palette Definition)
+# ------------------------------------------
+typeset -A theme_colors
+if [[ "$PRIDE_THEME_MODE" == "light" ]]; then
+  # Light Theme (适合白色/浅色背景，采用莫兰迪/高对比度深色系)
+  theme_colors=(
+    [arrow]="#C93B4E" [user]="#D9772B" [at]="#888888" [dir]="#A0507B" [dollar]="#8B5099" [input]="#8E6A9E"
+    [rainbow_1]="#C93B4E" [rainbow_2]="#D9772B" [rainbow_3]="#B59914" 
+    [rainbow_4]="#3A965E" [rainbow_5]="#3465A4" [rainbow_6]="#8B5099"
+    [trans_1]="#3D99C8" [trans_2]="#D47087" [trans_3]="#888888"
+  )
+else
+  # Dark Theme (适合黑色/深色背景，采用你最喜欢的粉彩马卡龙色系)
+  theme_colors=(
+    [arrow]="#D84B20" [user]="#EF7627" [at]="#FFFFFF" [dir]="#D162A4" [dollar]="#A30262" [input]="#C197D2"
+    [rainbow_1]="#FF8A8A" [rainbow_2]="#FFB37C" [rainbow_3]="#FFE599" 
+    [rainbow_4]="#A2E4B8" [rainbow_5]="#9BC1FF" [rainbow_6]="#D0B0FF"
+    [trans_1]="#5BCEFA" [trans_2]="#F5A9B8" [trans_3]="#FFFFFF"
+  )
+fi
 
+# ------------------------------------------
+# 3. 生成 Prompt
+# ------------------------------------------
+PROMPT="%F{${theme_colors[arrow]}}➜ %F{${theme_colors[user]}}${PRIDE_THEME_USER}%F{${theme_colors[at]}}@%F{${theme_colors[dir]}}%1~ %F{${theme_colors[dollar]}}$ %F{${theme_colors[input]}}"
 
 # 在敲下回车键执行命令的瞬间，重置颜色，防止污染外部程序的输出
-# Resets colors the instant the return key is pressed to prevent polluting external program output
 preexec() {
   print -rn -- $'\e[0m'
 }
 
-# ==========================================
-# 彩虹打字机 (Rainbow Typewriter) 功能
-# ==========================================
-
-# 默认状态为 off (使用默认的淡紫色)
-export RAINBOW_TYPING="off"
-
-# 定义颜色库：LGBT (6色) + Trans (3色)
-typeset -a rainbow_colors
-rainbow_colors=(
-  "#FF8A8A" # Pastel 红 (柔和红)
-  "#FFB37C" # Pastel 橙 (柔和橙)
-  "#FFE599" # Pastel 黄 (柔和黄)
-  "#A2E4B8" # Pastel 绿 (柔和绿)
-  "#9BC1FF" # Pastel 蓝 (柔和蓝)
-  "#D0B0FF" # Pastel 紫 (柔和紫)
-  "#5BCEFA" # Trans 浅蓝
-  "#F5A9B8" # Trans 浅粉
-  "#FFFFFF" # Trans 白
+# ------------------------------------------
+# 4. 彩虹打字机 (Rainbow Typewriter ZLE Hook)
+# ------------------------------------------
+typeset -a rainbow_array
+rainbow_array=(
+  ${theme_colors[rainbow_1]} ${theme_colors[rainbow_2]} ${theme_colors[rainbow_3]}
+  ${theme_colors[rainbow_4]} ${theme_colors[rainbow_5]} ${theme_colors[rainbow_6]}
+  ${theme_colors[trans_1]}   ${theme_colors[trans_2]}   ${theme_colors[trans_3]}
 )
 
 rainbow_typewriter() {
   if [[ "$RAINBOW_TYPING" != "on" ]]; then
-    # 如果没开，则清空我们自己加的高亮，使用终端默认（也就是 Prompt 结尾留下的淡紫色）
     region_highlight=()
     return
   fi
 
   local len=${#BUFFER}
   region_highlight=()
-  
-  if (( len == 0 )); then
-    return
-  fi
+  if (( len == 0 )); then return; fi
 
   local i
   local word_count=0
   local in_word=0
 
   for (( i=0; i < len; i++ )); do
-    # 提取当前字符
     local char="${BUFFER:$i:1}"
     
-    # 如果是空格或制表符，标记不在单词内，并且跳过着色
+    # 遇到空格/制表符不换色
     if [[ "$char" == " " || "$char" == $'\t' ]]; then
       in_word=0
       continue
     fi
-
-    # 如果刚才不在单词内，现在遇到了可见字符，说明进入了一个新单词
+    
+    # 遇到新单词则推进一步颜色
     if (( in_word == 0 )); then
       in_word=1
       ((word_count++))
     fi
-
-    # 根据单词的数量来计算颜色索引
+    
     local color_idx=$(( ((word_count - 1) % 9) + 1 ))
-    local c=${rainbow_colors[$color_idx]}
+    local c=${rainbow_array[$color_idx]}
     region_highlight+=("$i $((i+1)) fg=$c")
   done
 }
 
-# 注册 Zsh 的实时重绘 Hook，每次按键都会触发
 autoload -Uz add-zle-hook-widget
 zle -N rainbow_typewriter
 add-zle-hook-widget line-pre-redraw rainbow_typewriter
 
-# 提供开启/关闭的快捷命令
+# 快捷命令
 alias rainbow-on='export RAINBOW_TYPING="on"'
 alias rainbow-off='export RAINBOW_TYPING="off"'
