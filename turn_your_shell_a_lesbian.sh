@@ -150,7 +150,7 @@ run_loading() {
 # Clear screen at the very beginning
 clear
 
-# 0. 语言选择 (Language Selection)
+# 0. Language Selection
 echo "Please select your language (Use UP/DOWN arrows, then press ENTER):"
 echo "请选择你的语言 (按上下方向键选择，然后按回车键确认):"
 echo ""
@@ -227,7 +227,7 @@ else
     )
 fi
 
-# 1. 用户选择颜色模式 (大框里的交互式菜单)
+# 1. Theme Selection
 run_theme_menu "${OPTIONS[@]}"
 CHOICE=$?
 
@@ -253,7 +253,7 @@ elif [ "$CHOICE" -eq 4 ]; then
     INPUT_COLOR="purple"
 fi
 
-# 2. 询问用户想显示什么名字 (在新的空框里)
+# 2. Prompt for username
 clear
 echo -e "$BOX_TOP"
 echo -e "${C1}│${CR}\033[90G${C5}│${CR}"
@@ -270,7 +270,7 @@ if [[ -z "$THEME_USER" ]]; then
     THEME_USER="%n"
 fi
 
-# 获取当前 lesbiancolor.sh 的绝对路径
+# Get absolute path of lesbiancolor.sh
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 THEME_SCRIPT="$SCRIPT_DIR/lesbiancolor.sh"
 
@@ -281,7 +281,7 @@ fi
 
 ZSHRC="$HOME/.zshrc"
 
-# 3. 酷炫的 Loading 动画
+# 3. Play loading animation
 run_loading "$MSG_LOADING"
 
 cat <<EOF >> "$ZSHRC"
@@ -297,7 +297,7 @@ export PRIDE_INPUT_COLOR="$INPUT_COLOR"
 source "$THEME_SCRIPT"
 EOF
 
-# 4. 最后展示成功界面
+# 4. Show success screen
 clear
 echo -e "$BOX_TOP"
 echo -e "${C1}│${CR}\033[90G${C5}│${CR}"
